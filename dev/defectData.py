@@ -51,6 +51,7 @@ def thermal_noise_sequence(n_imgs, res):
         for j in np.arange(0,number_decrosses):
             beta = random.uniform(betaMin, betaMax)
             for k in np.arange(0,number_augments):
+                print(type(t.xy.snapshots['lattice'][-1]))
                 out_img = mask.mask(decrossI(beta, t.xy.snapshots['lattice'][-1]))
                 out_defect = t.xy.snapshots['defects'][-1]
 
