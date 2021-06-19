@@ -36,8 +36,9 @@ def oblique(beta, theta):
     wavel = 632.8 # Wavelength of light [nm]
     mincan = 2.0 # Angle of incidence of light [deg]
 
+    # I will use the beta angle to initialize these instead. Note that beta is in radians so that must be converted.
     mpolan = 0.0 # Polarizer angle [deg]
-    manlan = 88.0 # Analyzer angle [deg]
+    manlan = beta/degrad # 88.0 # Analyzer angle [deg]
 
     ## Temporary useful arrays from image (theta)
     sint = np.sin(theta) # x,y components of c-director field 
@@ -112,7 +113,12 @@ def thermal_noise_sequence(n_imgs, res):
             beta = random.uniform(betaMin, betaMax)
             for k in np.arange(0,number_augments):
 
+                # This is the default by Adam
                 out_img = mask.mask(decrossI(beta, t.xy.snapshots['lattice'][-1]))
+
+                # This is the one with oblique incidence
+                out_img = mask.mask(oblique(beta, t.xy.snapshots['lattice'][-1]))
+
                 out_defect = t.xy.snapshots['defects'][-1]
 
                 # print(np.max(out_img), np.where(out_img == np.max(out_img)))
