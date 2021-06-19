@@ -8,9 +8,9 @@ params:
         simulation_iterations: 100
         snapshots: 1
 
-    beta:
-        max: 115
-        min: 75
+    beta: # This is in radians not degrees!!
+        max: 91
+        min: 89
 
     defects:
         max: 5

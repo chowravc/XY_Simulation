@@ -17,9 +17,69 @@ from mpl_toolkits.mplot3d import Axes3D
 import time
 import data_utils
 
+def oblique(beta, theta):
+
+    # Use to convert degrees to radians
+    degrad = np.pi/180
+
+    ## Useful constants
+
+    nlayers = 5 # Number of layers in smectic film
+    dlayer = 3.17 # Smectic layer spacing [nm]
+    thick = nlayers*dlayer # Total film thickness [nm]
+
+    psi = 18.0 # Smectic C tilt angle [deg]
+
+    nExt = 1.7 # Extraordinary refractive index
+    nOrd = 1.5 # Ordinary refractive index
+
+    wavel = 632.8 # Wavelength of light [nm]
+    mincan = 2.0 # Angle of incidence of light [deg]
+
+    mpolan = 0.0 # Polarizer angle [deg]
+    manlan = 88.0 # Analyzer angle [deg]
+
+    ## Temporary useful arrays from image (theta)
+    sint = np.sin(theta) # x,y components of c-director field 
+    cost = np.cos(theta)
+    sinsqdt = sint**2
+    cossqdt = cost**2
+
+    ## Calculating useful temp variables
+
+    delta = 2.0*np.pi*thick/wavel # Optical path length wavel is the wavelength of light (p. 18)
+    epsperp, epspar = nOrd**2, nExt**2 # The dielectric constants are the refractives indices no, ne squared
+    deps = epspar - epsperp # Delta epsilon
+    eps33 = epsperp + deps*np.cos(psi*degrad)**2 # Dielectric constant along the layer normal (?)
+
+    neffsqd = epsperp*(epspar - deps*np.sin(psi*degrad)**2 * sinsqdt)/eps33 # Square of effective refractive index
+
+    ## Terms to calculating final intensity
+
+
+    # First term (neffsqd depends on theta)
+    A = delta*(neffsqd - epsperp)*np.cos(manlan*degrad)/(2.0*nOrd*np.cos(mincan*degrad))
+
+    # Constant part of coefficient of rounded bracket term
+    B = delta*deps*np.sin(psi*degrad)*np.sin(manlan*degrad)/(2.0*eps33)
+
+    # First term in rounded brackets (constant)
+    C = nord*np.cos(psi*degrad)*np.tan(mincan*degrad)
+
+    # coefficient of second term in rounded brackets
+    D = epsperp*np.sin(psi*degrad)/nord                                       ; 
+    
+    intensity = (A - B*cost*(C + D*sint))**2 # Eg 2.5 (decrossed analyzer, mpolan=0 normal to plane of incidence)
+
+    return intensity/np.max(intensity)
+
+
 def decrossI(beta,image):
-#beta is the angle between pol and anl (90 for completely crossed)
-    temp= ( np.sin(image)*np.cos(image)*np.sin(beta)-np.sin(image)**2*np.cos(beta)-np.cos(beta))**3
+#beta is the angle between pol and anl (90 (np.pi/2) for completely crossed)
+
+    # temp = (np.sin(image)*np.cos(image)*np.sin(beta)-np.sin(image)**2*np.cos(beta)-np.cos(beta))**3 # General case
+    temp = (np.sin(image)*np.cos(image))**3 # Special case 90
+
     return temp/temp.max()
 
 
@@ -51,13 +111,20 @@ def thermal_noise_sequence(n_imgs, res):
         for j in np.arange(0,number_decrosses):
             beta = random.uniform(betaMin, betaMax)
             for k in np.arange(0,number_augments):
-                print(type(t.xy.snapshots['lattice'][-1]))
+
                 out_img = mask.mask(decrossI(beta, t.xy.snapshots['lattice'][-1]))
                 out_defect = t.xy.snapshots['defects'][-1]
 
+                # print(np.max(out_img), np.where(out_img == np.max(out_img)))
+
+                # from PIL import Image
+
+                # img = Image.fromarray(out_img, 'L')
+                # img.show()
+
                 plt.imsave('../../data/'+current_time+'-t_{}.tiff'.format(i*number_decrosses*number_augments+j*number_augments+k), out_img, cmap = 'gray')
                 np.savetxt('../../data/label_'+current_time+'-t_{}.dat'.format(i*number_decrosses*number_augments+j*number_augments+k), out_defect)
-
+    print('Done.')
 
 
 class Texture():
@@ -75,20 +142,20 @@ class Texture():
         self.xy = self.evolve()
 
     def view(self):
-            def decrossI(beta,image):
-            #beta is the angle between pol and anl (90 for completely crossed)
-                temp= ( np.sin(image)*np.cos(image)*np.sin(beta)-np.sin(image)**2*np.cos(beta)-np.cos(beta))**3
-                return temp/temp.max()
+        def decrossI(beta,image):
+        #beta is the angle between pol and anl (90 for completely crossed)
+            temp= (np.sin(image)*np.cos(image)*np.sin(beta)-np.sin(image)**2*np.cos(beta)-np.cos(beta))**3
+            return temp/temp.max()
 
-            def schler(texture):
-                return np.sin(2*texture)**2
+        def schler(texture):
+            return np.sin(2*texture)**2
 
-            plt.imshow(schler(self.texture),cmap = 'gray')
+        plt.imshow(schler(self.texture),cmap = 'gray')
 
     def gen_defects(self):
         ix,iy = np.indices(self.size)
         def d_gen(grid,x,y,k,off):
-            grid = np.mod(grid+k*np.arctan2(ix-x, iy-y)+off,2*np.pi)
+            grid = np.mod(grid+k*np.arctan2(ix-x, iy-y)+off,2*np.pi) # FLAG A
             return grid
         grid = self.texture
 
@@ -125,6 +192,7 @@ class Texture():
 
 def schler(im):
     return np.sin(2*im)**2
+
 class SimData():
     '''This defines the SimData object. Given a series of parameters, it will generate a series of images for training a neural net. The parameters should be stored in a config file called simData.yaml in the yaml format
     '''
