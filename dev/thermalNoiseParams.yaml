@@ -1,0 +1,24 @@
+# Thermal noise params
+
+params:
+
+    image_utils:
+        number_decrosses: 1
+        number_augments: 1
+        simulation_iterations: 100
+        snapshots: 1
+
+    beta:
+        max: 115
+        min: 75
+
+    defects:
+        max: 5
+        min: 1
+
+    cluster_range: 15.0
+
+    evolve:
+        temp: 0.85
+        stepSize: 0.02
+        something: 10
