@@ -65,10 +65,10 @@ def oblique(beta, theta):
     B = delta*deps*np.sin(psi*degrad)*np.sin(manlan*degrad)/(2.0*eps33)
 
     # First term in rounded brackets (constant)
-    C = nord*np.cos(psi*degrad)*np.tan(mincan*degrad)
+    C = nOrd*np.cos(psi*degrad)*np.tan(mincan*degrad)
 
     # coefficient of second term in rounded brackets
-    D = epsperp*np.sin(psi*degrad)/nord                                       ; 
+    D = epsperp*np.sin(psi*degrad)/nOrd                                       ; 
     
     intensity = (A - B*cost*(C + D*sint))**2 # Eg 2.5 (decrossed analyzer, mpolan=0 normal to plane of incidence)
 
@@ -114,7 +114,7 @@ def thermal_noise_sequence(n_imgs, res):
             for k in np.arange(0,number_augments):
 
                 # This is the default by Adam
-                out_img = mask.mask(decrossI(beta, t.xy.snapshots['lattice'][-1]))
+                # out_img = mask.mask(decrossI(beta, t.xy.snapshots['lattice'][-1]))
 
                 # This is the one with oblique incidence
                 out_img = mask.mask(oblique(beta, t.xy.snapshots['lattice'][-1]))
