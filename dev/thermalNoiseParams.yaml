@@ -5,20 +5,20 @@ params:
     image_utils:
         number_decrosses: 1
         number_augments: 1
-        simulation_iterations: 10
+        simulation_iterations: 1
         snapshots: 1
 
     beta: # This is in radians not degrees!!
-        max: 1.57079632679
-        min: 1.57079632679
+        max: 0.5235987756
+        min: 0.5235987756
 
     defects:
-        max: 5
+        max: 1
         min: 1
 
     cluster_range: 15.0
 
     evolve:
-        temp: 12
+        temp: 0.0000000001
         stepSize: 0.02
         something: 10

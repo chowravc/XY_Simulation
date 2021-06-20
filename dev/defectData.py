@@ -106,11 +106,16 @@ def thermal_noise_sequence(n_imgs, res):
     mask = data_utils.augMask('./maskTemplate.yaml')
     
     for i in np.arange(0,n_imgs,number_decrosses*number_augments):
+
         print('{} %'.format(float(i/n_imgs)*100))
+
         n_defects = random.randint(minDefect,maxDefect)
         t = Texture(n_defects, simulation_iterations, snapshots, image_dimensions, thermalNoiseParams)
+
         for j in np.arange(0,number_decrosses):
+
             beta = random.uniform(betaMin, betaMax)
+
             for k in np.arange(0,number_augments):
 
                 # This is the default by Adam
@@ -130,6 +135,7 @@ def thermal_noise_sequence(n_imgs, res):
 
                 plt.imsave('../../data/'+current_time+'-t_{}.tiff'.format(i*number_decrosses*number_augments+j*number_augments+k), out_img, cmap = 'gray')
                 np.savetxt('../../data/label_'+current_time+'-t_{}.dat'.format(i*number_decrosses*number_augments+j*number_augments+k), out_defect)
+                np.savetxt('../../data/director_'+current_time+'-t_{}.dat'.format(i*number_decrosses*number_augments+j*number_augments+k), t.xy.snapshots['lattice'][-1])
     print('Done.')
 
 
